@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Advanced Web Page with JavaScript Classes</title>
+  <style>
+    .shape {
+      position: absolute;
+      cursor: pointer;
+    }
+    .rectangle {
+      width: 100px;
+      height: 50px;
+      background-color: blue;
+    }
+    .circle {
+      width: 50px;
+      height: 50px;
+      background-color: red;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <label for="shapeType">Shape Type:</label>
+    <select id="shapeType">
+      <option value="rectangle">Rectangle</option>
+      <option value="circle">Circle</option>
+    </select>
+    <br>
+    <label for="shapeColor">Shape Color:</label>
+    <input type="color" id="shapeColor" value="#000000">
+    <br>
+    <label for="shapeWidth">Shape Width:</label>
+    <input type="number" id="shapeWidth" value="100">
+    <br>
+    <label for="shapeHeight">Shape Height:</label>
+    <input type="number" id="shapeHeight" value="50">
+    <br>
+    <button onclick="createShape()">Create Shape</button>
+  </div>
+  <button onclick="randomizeShapePosition()">Randomize Shape Position</button>
+  <button onclick="clearAllShapes()">Clear All Shapes</button>
+  <button onclick="alertShapeDetails()">Alert Shape Details</button>
+
+
+
+  <script>
+    'use strict';
+
+    // Shape class
+    class Shape {
+      constructor(type, width, height, color, x = 0, y = 0) {
+        this.type = type;
+        this.width = width;
+        this.height = height;
+        this.color = color;
+        this.x = x;
+        this.y = y;
+        this.element = document.createElement('div');
+        this.element.classList.add('shape', this.type);
+        this.updateStyle();
+        document.body.appendChild(this.element);
+        this.element.addEventListener('mousedown', this.startDragging.bind(this));
+        this.element.addEventListener('mouseup', this.stopDragging.bind(this));
+      }
+
+      updateStyle() {
+        this.element.style.width = this.width + 'px';
+        this.element.style.height = this.height + 'px';
+        this.element.style.backgroundColor = this.color;
+        this.element.style.left = this.x + 'px';
+        this.element.style.top = this.y + 'px';
+      }
+
+      startDragging(event) {
+        this.dragging = true;
+        this.startX = event.clientX;
+        this.startY = event.clientY;
+        document.addEventListener('mousemove', this.drag.bind(this));
+      }
+
+      stopDragging() {
+        this.dragging = false;
+        document.removeEventListener('mousemove', this.drag.bind(this));
+      }
+
+      drag(event) {
+        if (this.dragging) {
+          const deltaX = event.clientX - this.startX;
+          const deltaY = event.clientY - this.startY;
+          this.x += deltaX;
+          this.y += deltaY;
+          this.updateStyle();
+          this.startX = event.clientX;
+          this.startY = event.clientY;
+        }
+      }
+
+      resize(width, height) {
+        this.width = width;
+        this.height = height;
+        this.updateStyle();
+      }
+
+      remove() {
+        document.body.removeChild(this.element);
+      }
+    }
+
+    // Rectangle class inheriting from Shape
+    class Rectangle extends Shape {
+      constructor(width, height, color, x, y) {
+        super('rectangle', width, height, color, x, y);
+      }
+    }
+
+    // Circle class inheriting from Shape
+    class Circle extends Shape {
+      constructor(radius, color, x, y) {
+        super('circle', radius * 2, radius * 2, color, x, y);
+        this.element.style.borderRadius = '50%';
+      }
+
+      resize(width) {
+        this.width = width;
+        this.height = width;
+        this.updateStyle();
+      }
+    }
+
+    function createShape() {
+      const shapeType = document.getElementById('shapeType').value;
+      const shapeColor = document.getElementById('shapeColor').value;
+      const shapeWidth = parseInt(document.getElementById('shapeWidth').value);
+      const shapeHeight = parseInt(document.getElementById('shapeHeight').value);
+
+      const centerX = window.innerWidth / 2 - shapeWidth / 2;
+      const centerY = window.innerHeight / 2 - shapeHeight / 2;
+
+      if (shapeType === 'rectangle') {
+        new Rectangle(shapeWidth, shapeHeight, shapeColor, centerX, centerY);
+      } else if (shapeType === 'circle') {
+        new Circle(shapeWidth / 2, shapeColor, centerX, centerY);
+      }
+    }
+    function randomizeShapePosition() {
+  const shapes = document.querySelectorAll('.shape');
+  shapes.forEach(shape => {
+    const randomX = Math.floor(Math.random() * (window.innerWidth - shape.offsetWidth));
+    const randomY = Math.floor(Math.random() * (window.innerHeight - shape.offsetHeight));
+    shape.style.left = `${randomX}px`;
+    shape.style.top = `${randomY}px`;
+  });
+}
+function clearAllShapes() {
+  const shapes = document.querySelectorAll('.shape');
+  shapes.forEach(shape => shape.remove());
+}
+function alertShapeDetails() {
+  const shapes = document.querySelectorAll('.shape');
+  const selectedShape = prompt('Enter the index of the shape (starting from 1):');
+  
+  if (selectedShape !== null) {
+    const index = parseInt(selectedShape) - 1;
+    if (index >= 0 && index < shapes.length) {
+      const shape = shapes[index];
+      alert(`Shape Type: ${shape.classList[1]}\nWidth: ${shape.offsetWidth}px\nHeight: ${shape.offsetHeight}px\nColor: ${shape.style.backgroundColor}\nPosition: Left: ${shape.style.left}, Top: ${shape.style.top}`);
+    } else {
+      alert('Invalid shape index!');
+    }
+  }
+}
+
+
+
+  </script>
+</body>
+</html>
